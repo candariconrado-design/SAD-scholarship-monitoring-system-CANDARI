@@ -13,7 +13,7 @@
     <a href="scholarships.html">Scholarship Programs</a>
     <a href="grades.html">Grade Submissions</a>
     <a href="compliance.html">Compliance</a>
-    <a href="#" onclick="logout()">Logout</a>
+    <a href="#" id="logoutBtn">Logout</a>
   </nav>
 
   <div class="container">
@@ -49,8 +49,8 @@
           <option value="false">No</option>
         </select>
       </div>
-      <button class="btn" onclick="saveProgram()">Save Program</button>
-      <button class="btn" style="background:#718096" onclick="resetForm()">Clear</button>
+      <button class="btn" id="saveBtn">Save Program</button>
+      <button class="btn" style="background:#718096" id="clearBtn">Clear</button>
     </div>
 
     <div class="card">
@@ -63,16 +63,111 @@
             <th>Min Units</th>
             <th>Allow Fail</th>
             <th>Active</th>
-            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="programTable"></tbody>
+        <tbody id="programTable">
+          <tr><td colspan="5">Loading...</td></tr>
+        </tbody>
       </table>
     </div>
   </div>
 
-  <script src="js/supabase.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/scholarships.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://qxdmbtrjwwbpdedbdlhc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4ZG1idHJqd3dicGRlZGJkbGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MTM1OTYsImV4cCI6MjEwNjI4OTU5Nn0.39ZVye-vP7HoBGr_uTpl2YvufiG80doASzdfAzER6h4';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Check login
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', async function() {
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+      });
+
+      // Load programs
+      loadPrograms();
+
+      // Save button
+      document.getElementById('saveBtn').addEventListener('click', saveProgram);
+
+      // Clear button
+      document.getElementById('clearBtn').addEventListener('click', function() {
+        document.getElementById('editId').value = '';
+        document.getElementById('program_name').value = '';
+        document.getElementById('required_gwa').value = '';
+        document.getElementById('min_units').value = '';
+        document.getElementById('allow_failing_grade').value = 'false';
+        document.getElementById('active').value = 'true';
+        document.getElementById('message').innerHTML = '';
+      });
+    });
+
+    async function loadPrograms() {
+      const { data, error } = await supabase.from('scholarship_programs').select('*').order('program_name');
+      const tbody = document.getElementById('programTable');
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="5">Error: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">No programs yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td>${p.program_name}</td>
+          <td>${p.required_gwa}</td>
+          <td>${p.min_units}</td>
+          <td>${p.allow_failing_grade ? 'Yes' : 'No'}</td>
+          <td>${p.active ? 'Yes' : 'No'}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function saveProgram() {
+      const msg = document.getElementById('message');
+      const program_name = document.getElementById('program_name').value.trim();
+      const required_gwa = parseFloat(document.getElementById('required_gwa').value);
+      const min_units = parseInt(document.getElementById('min_units').value);
+      const allow_failing_grade = document.getElementById('allow_failing_grade').value === 'true';
+      const active = document.getElementById('active').value === 'true';
+
+      if (!program_name || isNaN(required_gwa) || isNaN(min_units)) {
+        msg.innerHTML = '<div class="alert alert-error">All fields are required</div>';
+        return;
+      }
+
+      msg.innerHTML = 'Saving...';
+
+      const { error } = await supabase.from('scholarship_programs').insert({
+        program_name,
+        required_gwa,
+        min_units,
+        allow_failing_grade,
+        active
+      });
+
+      if (error) {
+        msg.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+      } else {
+        msg.innerHTML = '<div class="alert alert-success">Program saved successfully!</div>';
+        document.getElementById('program_name').value = '';
+        document.getElementById('required_gwa').value = '';
+        document.getElementById('min_units').value = '';
+        loadPrograms();
+      }
+    }
+  </script>
 </body>
 </html>

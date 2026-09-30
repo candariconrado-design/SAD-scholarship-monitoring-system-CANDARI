@@ -4,8 +4,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadPrograms() {
-  const { data } = await supabase.from('scholarship_programs').select('*').order('program_name');
+  const { data, error } = await supabase.from('scholarship_programs').select('*').order('program_name');
   const tbody = document.getElementById('programTable');
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="6">Error: ${error.message}</td></tr>`;
+    return;
+  }
   tbody.innerHTML = (data || []).map(p => `
     <tr>
       <td>${p.program_name}</td>
@@ -15,7 +19,7 @@ async function loadPrograms() {
       <td>${p.active ? 'Yes' : 'No'}</td>
       <td><button class="btn" onclick='editProgram(${JSON.stringify(p)})'>Edit</button></td>
     </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="6">No programs yet</td></tr>';
 }
 
 function editProgram(p) {
@@ -60,10 +64,10 @@ async function saveProgram() {
   }
 
   if (result.error) {
-    msg.innerHTML = `<div class="alert alert-error">${result.error.message}</div>`;
+    msg.innerHTML = `<div class="alert alert-error">Error: ${result.error.message}</div>`;
     return;
   }
-  msg.innerHTML = '<div class="alert alert-success">Program saved</div>';
+  msg.innerHTML = '<div class="alert alert-success">Program saved successfully!</div>';
   resetForm();
   loadPrograms();
 }

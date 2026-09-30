@@ -7,29 +7,53 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="container" style="max-width:400px; margin-top:80px;">
+  <div class="container" style="max-width:420px; margin-top:80px;">
     <div class="card">
       <h1>Scholarship Monitoring</h1>
-      <p style="margin-bottom:20px;">Staff / Admin Login</p>
-      <div id="message"></div>
+      <p style="margin-bottom:20px;">Staff Login</p>
+      <div id="message" style="margin-bottom:15px;"></div>
       <div class="form-group">
         <label>Email</label>
-        <input type="email" id="email" placeholder="staff@example.com">
+        <input type="email" id="email" value="candari@gmail.com">
       </div>
       <div class="form-group">
         <label>Password</label>
         <input type="password" id="password">
       </div>
-      <button class="btn" onclick="login()">Login</button>
+      <button class="btn" id="loginBtn">Login</button>
     </div>
   </div>
 
-  <script src="js/supabase.js"></script>
-  <script src="js/auth.js"></script>
   <script>
-    // redirect if already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) window.location.href = 'dashboard.html';
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('loginBtn').addEventListener('click', async function() {
+        const msg = document.getElementById('message');
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        msg.innerHTML = 'Nag-login...';
+
+        if (!window.supabase) {
+          msg.innerHTML = '<div class="alert alert-error">Supabase library failed to load</div>';
+          return;
+        }
+
+        const supabase = window.supabase.createClient(
+          'https://qxdmbtrjwwbpdedbdlhc.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4ZG1idHJqd3dicGRlZGJkbGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MTM1OTYsImV4cCI6MjEwNjI4OTU5Nn0.39ZVye-vP7HoBGr_uTpl2YvufiG80doASzdfAzER6h4'
+        );
+
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            msg.innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+          } else {
+            msg.innerHTML = '<div class="alert alert-success">SUCCESS! Redirecting...</div>';
+            setTimeout(() => window.location.href = 'dashboard.html', 800);
+          }
+        } catch (err) {
+          msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+        }
+      });
     });
   </script>
 </body>
