@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scholars</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="scholars.html">Scholars</a>
+    <a href="scholarships.html">Scholarship Programs</a>
+    <a href="grades.html">Grade Submissions</a>
+    <a href="compliance.html">Compliance</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="container">
+    <h1>Scholar Management</h1>
+
+    <div class="card">
+      <h2 id="formTitle">Register New Scholar</h2>
+      <div id="message"></div>
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label>Student ID *</label>
+        <input type="text" id="student_id">
+      </div>
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="full_name">
+      </div>
+      <div class="form-group">
+        <label>Degree Program *</label>
+        <input type="text" id="degree_program">
+      </div>
+      <div class="form-group">
+        <label>Year Level *</label>
+        <input type="number" id="year_level" min="1" max="5">
+      </div>
+      <div class="form-group">
+        <label>Scholarship Program *</label>
+        <select id="scholarship_id"></select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option>Active</option>
+          <option>Pending Submission</option>
+          <option>For Verification</option>
+          <option>Compliant</option>
+          <option>With Deficiency</option>
+          <option>Probationary</option>
+          <option>For Renewal</option>
+          <option>Renewed</option>
+          <option>Disqualified</option>
+        </select>
+      </div>
+      <button class="btn" onclick="saveScholar()">Save Scholar</button>
+      <button class="btn" style="background:#718096" onclick="resetForm()">Clear</button>
+    </div>
+
+    <div class="card">
+      <h2>Search & Filter</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input type="text" id="search" placeholder="Search Student ID or Name" style="flex:1; padding:8px;">
+        <select id="filterProgram" style="padding:8px;">
+          <option value="">All Programs</option>
+        </select>
+        <select id="filterStatus" style="padding:8px;">
+          <option value="">All Status</option>
+          <option>Active</option>
+          <option>Pending Submission</option>
+          <option>For Verification</option>
+          <option>Compliant</option>
+          <option>With Deficiency</option>
+          <option>Probationary</option>
+          <option>For Renewal</option>
+          <option>Renewed</option>
+          <option>Disqualified</option>
+        </select>
+        <button class="btn" onclick="loadScholars()">Apply</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Scholar List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Program</th>
+            <th>Year</th>
+            <th>Scholarship</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="scholarTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/scholars.js"></script>
+</body>
+</html>

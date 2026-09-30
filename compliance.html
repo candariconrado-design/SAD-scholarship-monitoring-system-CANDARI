@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Compliance</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="scholars.html">Scholars</a>
+    <a href="scholarships.html">Scholarship Programs</a>
+    <a href="grades.html">Grade Submissions</a>
+    <a href="compliance.html">Compliance</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="container">
+    <h1>Compliance Overview</h1>
+    <div class="card">
+      <p>This page shows scholars with their latest status after verification.</p>
+      <p><strong>Compliance Rule (documented):</strong> Lower GWA is better. A scholar is <strong>Compliant</strong> only if:</p>
+      <ul>
+        <li>GWA ≤ required_gwa of the assigned scholarship</li>
+        <li>Units enrolled ≥ min_units</li>
+        <li>Failed subjects = 0 (unless the program allows failing grades)</li>
+      </ul>
+      <p>Only <strong>Verified</strong> submissions are used for evaluation (BR-05).</p>
+    </div>
+
+    <div class="card">
+      <h2>Scholars by Status</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Scholarship</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="compTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await requireAuth();
+      const { data } = await supabase.from('scholars')
+        .select(`*, scholarship_programs(program_name)`)
+        .order('status');
+      document.getElementById('compTable').innerHTML = (data || []).map(s => `
+        <tr>
+          <td>${s.student_id}</td>
+          <td>${s.full_name}</td>
+          <td>${s.scholarship_programs?.program_name || '-'}</td>
+          <td>${s.status}</td>
+        </tr>
+      `).join('');
+    });
+  </script>
+</body>
+</html>
