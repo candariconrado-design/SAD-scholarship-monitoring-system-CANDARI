@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>Dashboard - Scholarship Monitoring</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -18,7 +18,22 @@
 
   <div class="container">
     <h1>Dashboard</h1>
-    <div class="stats" id="stats"></div>
+    <p style="color:#64748b; margin-bottom:24px;">Live overview of scholarship compliance and submissions</p>
+
+    <div class="stats" id="stats">
+      <div class="stat-card"><h3>...</h3><p>Total Scholars</p></div>
+      <div class="stat-card"><h3>...</h3><p>Pending Submissions</p></div>
+      <div class="stat-card"><h3>...</h3><p>Verified Submissions</p></div>
+      <div class="stat-card"><h3>...</h3><p>Compliant Scholars</p></div>
+      <div class="stat-card"><h3>...</h3><p>With Deficiency</p></div>
+    </div>
+
+    <div class="card">
+      <h2>System Status</h2>
+      <div id="systemStatus" style="color:#64748b; line-height:1.7;">
+        Loading data from database...
+      </div>
+    </div>
   </div>
 
   <script src="js/supabase.js"></script>
