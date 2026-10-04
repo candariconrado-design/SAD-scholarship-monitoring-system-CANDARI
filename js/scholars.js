@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadProgramsDropdown() {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('scholarship_programs')
     .select('id, program_name')
     .eq('active', true)
@@ -39,7 +39,7 @@ async function loadScholars() {
   const programFilter = document.getElementById('filterProgram')?.value || '';
   const statusFilter = document.getElementById('filterStatus')?.value || '';
 
-  let query = supabase
+  let query = sb
     .from('scholars')
     .select('id, student_id, full_name, degree_program, year_level, scholarship_id, status, scholarship_programs(program_name)')
     .order('full_name');
@@ -118,7 +118,7 @@ async function saveScholar() {
     return;
   }
 
-  const { data: program, error: programError } = await supabase
+  const { data: program, error: programError } = await sb
     .from('scholarship_programs')
     .select('id, active')
     .eq('id', scholarship_id)
@@ -134,7 +134,7 @@ async function saveScholar() {
     return;
   }
 
-  const duplicateQuery = supabase
+  const duplicateQuery = sb
     .from('scholars')
     .select('id')
     .eq('student_id', student_id);
@@ -155,8 +155,8 @@ async function saveScholar() {
   const payload = { student_id, full_name, degree_program, year_level, scholarship_id, status };
 
   const result = id
-    ? await supabase.from('scholars').update(payload).eq('id', id)
-    : await supabase.from('scholars').insert(payload);
+    ? await sb.from('scholars').update(payload).eq('id', id)
+    : await sb.from('scholars').insert(payload);
 
   if (result.error) {
     showMessage('message', result.error.message);

@@ -17,23 +17,23 @@ async function loadStats() {
 
   try {
     const results = await Promise.all([
-      supabase.from('scholars')
+      sb.from('scholars')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'Active'),
 
-      supabase.from('grade_submissions')
+      sb.from('grade_submissions')
         .select('id', { count: 'exact', head: true })
         .in('submission_status', ['Pending', 'For Verification']),
 
-      supabase.from('grade_submissions')
+      sb.from('grade_submissions')
         .select('id', { count: 'exact', head: true })
         .eq('submission_status', 'Verified'),
 
-      supabase.from('scholars')
+      sb.from('scholars')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'Compliant'),
 
-      supabase.from('scholars')
+      sb.from('scholars')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'With Deficiency')
     ]);
