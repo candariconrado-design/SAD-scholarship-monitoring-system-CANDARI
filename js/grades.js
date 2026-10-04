@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadScholarsDropdown() {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('scholars')
     .select('id, student_id, full_name')
     .order('full_name');
@@ -28,7 +28,6 @@ async function loadScholarsDropdown() {
 }
 
 async function submitGrades() {
-  const msg = document.getElementById('message');
   const scholar_id = document.getElementById('scholar_id').value;
   const academic_year = document.getElementById('academic_year').value.trim();
   const semester = document.getElementById('semester').value;
@@ -52,7 +51,7 @@ async function submitGrades() {
     return;
   }
 
-  const { data: scholar, error: scholarError } = await supabase
+  const { data: scholar, error: scholarError } = await sb
     .from('scholars')
     .select('id')
     .eq('id', scholar_id)
@@ -63,7 +62,7 @@ async function submitGrades() {
     return;
   }
 
-  const { data: existing, error: duplicateError } = await supabase
+  const { data: existing, error: duplicateError } = await sb
     .from('grade_submissions')
     .select('id, submission_status')
     .eq('scholar_id', scholar_id)
@@ -81,7 +80,7 @@ async function submitGrades() {
     return;
   }
 
-  const { error } = await supabase.from('grade_submissions').insert({
+  const { error } = await sb.from('grade_submissions').insert({
     scholar_id,
     academic_year,
     semester,
@@ -108,7 +107,7 @@ async function submitGrades() {
 }
 
 async function loadPending() {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('grade_submissions')
     .select('id, academic_year, semester, gwa, units_enrolled, failed_subjects, submission_status, scholars(student_id, full_name)')
     .in('submission_status', ['Pending', 'For Verification'])
@@ -136,7 +135,7 @@ async function loadPending() {
 }
 
 async function loadAll() {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('grade_submissions')
     .select('id, academic_year, semester, gwa, submission_status, verified_at, scholars(student_id, full_name)')
     .order('submitted_at', { ascending: false })
@@ -169,7 +168,7 @@ async function verifySubmission(id) {
     return;
   }
 
-  const { data: existing, error: lookupError } = await supabase
+  const { data: existing, error: lookupError } = await sb
     .from('grade_submissions')
     .select('id, submission_status')
     .eq('id', id)
@@ -190,7 +189,7 @@ async function verifySubmission(id) {
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await sb
     .from('grade_submissions')
     .update({
       submission_status: 'Verified',
@@ -218,7 +217,7 @@ async function verifySubmission(id) {
 }
 
 async function evaluateCompliance(submissionId) {
-  const { data: sub, error: subError } = await supabase
+  const { data: sub, error: subError } = await sb
     .from('grade_submissions')
     .select('id, scholar_id, gwa, units_enrolled, failed_subjects, incomplete_subjects, submission_status, scholars(id, scholarship_id, scholarship_programs(id, required_gwa, min_units, allow_failing_grade))')
     .eq('id', submissionId)
@@ -245,7 +244,7 @@ async function evaluateCompliance(submissionId) {
   const isCompliant = gwaOk && unitsOk && failOk;
   const newStatus = isCompliant ? 'Compliant' : 'With Deficiency';
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await sb
     .from('scholars')
     .update({ status: newStatus })
     .eq('id', sub.scholar_id);

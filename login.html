@@ -14,7 +14,7 @@
       <div id="message" style="margin-bottom:15px;"></div>
       <div class="form-group">
         <label>Email</label>
-        <input type="email" id="email" value="candari@gmail.com">
+        <input type="email" id="email" value="staff@scholarship.com">
       </div>
       <div class="form-group">
         <label>Password</label>
@@ -24,26 +24,22 @@
     </div>
   </div>
 
+  <script src="js/supabase.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('loginBtn').addEventListener('click', async function() {
         const msg = document.getElementById('message');
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-        msg.innerHTML = 'Nag-login...';
+        msg.innerHTML = 'Logging in...';
 
-        if (!window.supabase) {
-          msg.innerHTML = '<div class="alert alert-error">Supabase library failed to load</div>';
+        if (!window.sb) {
+          msg.innerHTML = '<div class="alert alert-error">Supabase client failed to load</div>';
           return;
         }
 
-        const supabase = window.supabase.createClient(
-          'https://qxdmbtrjwwbpdedbdlhc.supabase.co',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4ZG1idHJqd3dicGRlZGJkbGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MTM1OTYsImV4cCI6MjEwNjI4OTU5Nn0.39ZVye-vP7HoBGr_uTpl2YvufiG80doASzdfAzER6h4'
-        );
-
         try {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          const { data, error } = await sb.auth.signInWithPassword({ email, password });
           if (error) {
             msg.innerHTML = `<div class="alert alert-error">${error.message}</div>`;
           } else {
