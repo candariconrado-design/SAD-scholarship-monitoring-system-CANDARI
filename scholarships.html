@@ -13,7 +13,7 @@
     <a href="scholarships.html">Scholarship Programs</a>
     <a href="grades.html">Grade Submissions</a>
     <a href="compliance.html">Compliance</a>
-    <a href="#" onclick="logout()">Logout</a>
+    <a href="#" onclick="logout(); return false;">Logout</a>
   </nav>
 
   <div class="container">
@@ -85,7 +85,7 @@
     });
 
     async function loadPrograms() {
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from('scholarship_programs')
         .select('id, program_name, required_gwa, min_units, allow_failing_grade, active')
         .order('program_name');
@@ -158,9 +158,9 @@
 
       let result;
       if (id) {
-        result = await supabase.from('scholarship_programs').update(payload).eq('id', id);
+        result = await sb.from('scholarship_programs').update(payload).eq('id', id);
       } else {
-        result = await supabase.from('scholarship_programs').insert(payload);
+        result = await sb.from('scholarship_programs').insert(payload);
       }
 
       if (result.error) {

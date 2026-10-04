@@ -50,7 +50,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       await requireAuth();
-      const { data } = await supabase.from('scholars')
+      const { data } = await sb.from('scholars')
         .select(`*, scholarship_programs(program_name)`)
         .order('status');
       document.getElementById('compTable').innerHTML = (data || []).map(s => `
@@ -60,7 +60,7 @@
           <td>${s.scholarship_programs?.program_name || '-'}</td>
           <td>${s.status}</td>
         </tr>
-      `).join('');
+      `).join('') || '<tr><td colspan="4">No scholars found</td></tr>';
     });
   </script>
 </body>
