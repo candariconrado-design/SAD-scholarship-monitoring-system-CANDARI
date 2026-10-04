@@ -79,14 +79,15 @@
   <script src="js/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      await requireAuth();
-      loadPrograms();
+      const session = await requireAuth(['admin', 'staff']);
+      if (!session) return;
+      await loadPrograms();
     });
 
     async function loadPrograms() {
       const { data, error } = await supabase
         .from('scholarship_programs')
-        .select('*')
+        .select('id, program_name, required_gwa, min_units, allow_failing_grade, active')
         .order('program_name');
 
       const tbody = document.getElementById('programTable');
@@ -140,8 +141,16 @@
       const allow_failing_grade = document.getElementById('allow_failing_grade').value === 'true';
       const active = document.getElementById('active').value === 'true';
 
-      if (!program_name || isNaN(required_gwa) || isNaN(min_units)) {
-        msg.innerHTML = '<div class="alert alert-error">All fields are required</div>';
+      if (!program_name || Number.isNaN(required_gwa) || Number.isNaN(min_units)) {
+        msg.innerHTML = '<div class="alert alert-error">All fields are required.</div>';
+        return;
+      }
+      if (required_gwa < 1 || required_gwa > 5) {
+        msg.innerHTML = '<div class="alert alert-error">Required GWA must be between 1.00 and 5.00.</div>';
+        return;
+      }
+      if (min_units < 0) {
+        msg.innerHTML = '<div class="alert alert-error">Minimum units cannot be negative.</div>';
         return;
       }
 
@@ -161,7 +170,7 @@
 
       msg.innerHTML = '<div class="alert alert-success">Program saved successfully!</div>';
       resetForm();
-      loadPrograms();
+      await loadPrograms();
     }
   </script>
 </body>
