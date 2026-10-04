@@ -1,6 +1,6 @@
 async function requireAuth(allowedRoles = ['admin', 'staff']) {
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const { data: { session }, error } = await sb.auth.getSession();
 
     if (error) throw error;
 
@@ -13,7 +13,7 @@ async function requireAuth(allowedRoles = ['admin', 'staff']) {
       const profile = await getCurrentProfile();
 
       if (!profile) {
-        await supabase.auth.signOut();
+        await sb.auth.signOut();
         window.location.href = 'login.html';
         return null;
       }
@@ -42,7 +42,7 @@ async function requireAuth(allowedRoles = ['admin', 'staff']) {
 
 async function logout() {
   try {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await sb.auth.signOut();
     if (error) console.error('Logout error:', error);
   } finally {
     window.location.href = 'login.html';
@@ -50,11 +50,11 @@ async function logout() {
 }
 
 async function getCurrentProfile() {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await sb.auth.getUser();
 
   if (userError || !user) return null;
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('profiles')
     .select('id, full_name, role')
     .eq('id', user.id)
