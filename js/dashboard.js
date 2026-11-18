@@ -18,8 +18,7 @@ async function loadStats() {
   try {
     const results = await Promise.all([
       sb.from('scholars')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'Active'),
+        .select('id', { count: 'exact', head: true }),
 
       sb.from('grade_submissions')
         .select('id', { count: 'exact', head: true })
