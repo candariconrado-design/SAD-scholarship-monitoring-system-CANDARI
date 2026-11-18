@@ -1,67 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Compliance</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-  <nav class="navbar">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="scholars.html">Scholars</a>
-    <a href="scholarships.html">Scholarship Programs</a>
-    <a href="grades.html">Grade Submissions</a>
-    <a href="compliance.html">Compliance</a>
-    <a href="#" onclick="logout(); return false;">Logout</a>
-  </nav>
-
-  <div class="container">
-    <h1>Compliance Overview</h1>
-    <div class="card">
-      <p>This page shows scholars with their latest status after verification.</p>
-      <p><strong>Compliance Rule (documented):</strong> Lower GWA is better. A scholar is <strong>Compliant</strong> only if:</p>
-      <ul>
-        <li>GWA ≤ required_gwa of the assigned scholarship</li>
-        <li>Units enrolled ≥ min_units</li>
-        <li>Failed subjects = 0 (unless the program allows failing grades)</li>
-      </ul>
-      <p>Only <strong>Verified</strong> submissions are used for evaluation (BR-05).</p>
-    </div>
-
-    <div class="card">
-      <h2>Scholars by Status</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Student ID</th>
-            <th>Name</th>
-            <th>Scholarship</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="compTable"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <script src="js/supabase.js"></script>
-  <script src="js/auth.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      await requireAuth();
-      const { data } = await sb.from('scholars')
-        .select(`*, scholarship_programs(program_name)`)
-        .order('status');
-      document.getElementById('compTable').innerHTML = (data || []).map(s => `
-        <tr>
-          <td>${s.student_id}</td>
-          <td>${s.full_name}</td>
-          <td>${s.scholarship_programs?.program_name || '-'}</td>
-          <td>${s.status}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="4">No scholars found</td></tr>';
-    });
-  </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compliance | Scholarship Monitoring</title><link rel="stylesheet" href="css/style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
+<body><nav class="navbar">
+<a href="dashboard.html">Dashboard</a><a href="scholars.html">Scholars</a><a href="scholarships.html">Scholarship Programs</a><a href="grades.html">Grade Submissions</a><a href="compliance.html">Compliance</a><a href="renewals.html">Renewals</a><a href="documents.html">Documents</a><a href="notifications.html">Notifications</a><a href="reports.html">Reports</a><a href="#" onclick="logout();return false">Logout</a>
+</nav><main class="container"><h1>Academic Compliance</h1><p class="page-intro">Latest verified semester result for each scholar. Compliance is calculated from the assigned scholarship rules.</p>
+<section class="card"><h2>Evaluation rules</h2><p>Lower GWA is better. A verified submission is compliant only when GWA ≤ required GWA, units ≥ minimum units, failing subjects comply with program policy, and incomplete subjects are cleared.</p><p class="page-intro">Unverified submissions are never used for final evaluation.</p></section>
+<section class="card"><div class="toolbar"><input id="searchCompliance" placeholder="Search student ID or scholar name"><select id="statusFilter"><option value="">All statuses</option><option>Compliant</option><option>With Deficiency</option><option>Pending Submission</option><option>For Verification</option><option>For Renewal</option><option>Renewed</option><option>Probationary</option><option>Disqualified</option></select></div>
+<table><thead><tr><th>Student ID</th><th>Scholar</th><th>Scholarship</th><th>Current Status</th></tr></thead><tbody id="compTable"><tr><td colspan="4">Loading…</td></tr></tbody></table></section></main>
+<script src="js/supabase.js"></script><script src="js/auth.js"></script><script>
+document.addEventListener('DOMContentLoaded',async()=>{const session=await requireAuth();if(!session)return;await loadCompliance();document.getElementById('searchCompliance').addEventListener('input',loadCompliance);document.getElementById('statusFilter').addEventListener('change',loadCompliance);});
+async function loadCompliance(){const q=document.getElementById('searchCompliance').value.trim().toLowerCase();const status=document.getElementById('statusFilter').value;let query=sb.from('scholars').select('student_id,full_name,status,scholarship_programs(program_name)').order('full_name');if(status)query=query.eq('status',status);const {data,error}=await query;const body=document.getElementById('compTable');if(error){body.innerHTML='<tr><td colspan="4">'+escapeHtml(error.message)+'</td></tr>';return;}const rows=(data||[]).filter(s=>!q||s.student_id.toLowerCase().includes(q)||s.full_name.toLowerCase().includes(q));body.innerHTML=rows.map(s=>'<tr><td>'+escapeHtml(s.student_id)+'</td><td>'+escapeHtml(s.full_name)+'</td><td>'+escapeHtml(s.scholarship_programs?.program_name||'—')+'</td><td><span class="status-pill '+(s.status==='Compliant'?'success':s.status==='With Deficiency'?'danger':'neutral')+'">'+escapeHtml(s.status)+'</span></td></tr>').join('')||'<tr><td colspan="4" class="empty-state">No matching scholars.</td></tr>';}
+</script></body></html>
