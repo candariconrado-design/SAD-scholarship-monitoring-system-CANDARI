@@ -134,5 +134,15 @@ async function evaluateCompliance(submissionId) {
 
   const { error: updateError } = await sb.from('scholars').update({ status }).eq('id', sub.scholar_id);
   if (updateError) return { success: false, message: updateError.message };
+  const profile = await getCurrentProfile();
+  const { error: historyError } = await sb.from('compliance_evaluations').insert({
+    scholar_id: sub.scholar_id,
+    grade_submission_id: sub.id,
+    scholarship_program_id: program.id,
+    evaluation_status: status,
+    deficiency_reasons: reasons,
+    evaluated_by: profile?.id || null
+  });
+  if (historyError) return { success: false, message: 'Status updated, but evaluation history could not be saved: ' + historyError.message };
   return { success: true, status, reasons: reasons.length ? reasons : ['All configured academic conditions were met.'] };
 }
